@@ -3,11 +3,13 @@ import ListGroup from 'react-bootstrap/ListGroup';
 import axios from 'axios';
 import ListItem from './ListItem';
 import Card from 'react-bootstrap/Card';
+import NewTask from './NewTask';
 
 class ListContainer extends React.Component {
     constructor(props){
         super(props);
         this.state = {tasks: []};
+        this.handleTaskCreated = this.handleTaskCreated.bind(this);
     }
     componentDidMount() {
         axios.get('/api/v1/tasks.json')
@@ -19,18 +21,22 @@ class ListContainer extends React.Component {
             })
             .catch(error => console.log(error));
     }
+    handleTaskCreated(task){
+        const tasks = [ ...this.state.tasks, task ];
+        this.setState({tasks});
+    }
     render() {
         return (
             <div>
-                <h1 className="header">My Todo List</h1>
                 <Card>
-                    {/* <Card.Header></Card.Header> */}
+                    <Card.Header as="h3">My Todo List</Card.Header>
                     <ListGroup>
                         {this.state.tasks.map(task => {
                             return (
                                 <ListItem task={task} key={task.id}/>
                             );
                         })}
+                        <NewTask handleTaskCreated={this.handleTaskCreated}/>
                     </ListGroup>
                 </Card>
             </div>

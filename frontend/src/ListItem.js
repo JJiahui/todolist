@@ -11,7 +11,7 @@ class ListItem extends React.Component {
             <ListGroup.Item>
                 <Row noGutters={true}>
                     <Col sm="auto">
-                        <Form.Check type="checkbox" checked={this.props.task.completed}
+                        <Form.Check type="checkbox" defaultChecked={this.props.task.completed}
                             onClick={() => console.log(this.props.task.id)} />
                     </Col>
                     <Col>
