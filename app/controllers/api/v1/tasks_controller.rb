@@ -37,6 +37,11 @@ class Api::V1::TasksController < ApplicationController
   # DELETE /tasks/1
   def destroy
     @task.destroy
+    if @task.destroy
+        head :no_content, status: :ok
+      else
+        render json: @task.errors, status: :unprocessable_entity
+      end  
   end
 
   private

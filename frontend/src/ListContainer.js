@@ -10,6 +10,7 @@ class ListContainer extends React.Component {
         super(props);
         this.state = {tasks: []};
         this.handleTaskCreated = this.handleTaskCreated.bind(this);
+        this.handleDelete = this.handleDelete.bind(this);
     }
     componentDidMount() {
         axios.get('/api/v1/tasks.json')
@@ -25,6 +26,16 @@ class ListContainer extends React.Component {
         const tasks = [ ...this.state.tasks, task ];
         this.setState({tasks});
     }
+    handleDelete(id){
+        axios.delete( '/api/v1/tasks/' + id )
+            .then(response => {
+                const tasks = this.state.tasks.filter(
+                    task => task.id !== id
+                )
+                this.setState({tasks});
+            })
+            .catch(error => console.log(error));
+    }
     render() {
         return (
             <div>
@@ -33,7 +44,7 @@ class ListContainer extends React.Component {
                     <ListGroup>
                         {this.state.tasks.map(task => {
                             return (
-                                <ListItem task={task} key={task.id}/>
+                                <ListItem task={task} key={task.id} handleDelete={this.handleDelete}/>
                             );
                         })}
                         <NewTask handleTaskCreated={this.handleTaskCreated}/>
