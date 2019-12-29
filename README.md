@@ -1,24 +1,20 @@
-# README
+### CVWO mid-assignment submission
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+- Name: Jiang Jiahui
+- Matric No: A0185088R
 
-Things you may want to cover:
+- Ruby 2.6.5
+- Rails 6.0.2.1
 
-* Ruby version
+#### To run:
 
-* System dependencies
+```
+# do
+yarn install
+# within `/frontend` directory
 
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+bundle install
+rake db:migrate
+rake db:seed
+foreman start -f Procfile.dev # gem install foreman
+```
