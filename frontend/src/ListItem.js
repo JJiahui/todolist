@@ -1,13 +1,23 @@
 import React from 'react';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Form from 'react-bootstrap/Form'
-import Col from 'react-bootstrap/Col';
-import Row from 'react-bootstrap/Row';
 import Card from 'react-bootstrap/Card'
 import DropdownButton from 'react-bootstrap/DropdownButton'
 import Dropdown from 'react-bootstrap/Dropdown'
 import TaskForm from './TaskForm';
 import axios from 'axios';
+import * as log from 'loglevel';
+
+
+const tag_style = {
+	height: "26px",
+	textAlign: "center",
+	padding: "0 8px",
+	fontSize: "14px",
+	borderRadius: "14px",
+	margin: "0 8px 8px 0",
+    background: "#eeeeee"
+};
 
 class ListItem extends React.Component {
     constructor(props){
@@ -15,33 +25,37 @@ class ListItem extends React.Component {
         this.state = { editing: false };
         this.toggleCompleted = this.toggleCompleted.bind(this);
         this.handleEditing = this.handleEditing.bind(this);
-        this.handleEdit = this.handleEdit.bind(this);
         this.handleNotEditing = this.handleNotEditing.bind(this);
         this.handleUpdateTask = this.handleUpdateTask.bind(this);
     }
     getLayout(){
        return (
             <ListGroup.Item >
-                <Row noGutters={true}>
-                    <Col sm="auto">
+                <div style={{display: "flex", justifyContent: "space-between"}}>
+                    <div style={{display: "flex", flexDirection: "row", marginRight: "10px"}}>
                         <Form.Check type="checkbox" defaultChecked={this.props.task.completed}
                             onClick={this.toggleCompleted} />
-                    </Col>
-                    <Col >
-                        <Card.Title>
-                            {this.props.task.description}
-                        </Card.Title>
-                        {this.props.task.notes 
-                            ? <Card.Text>{this.props.task.notes}</Card.Text>
-                            : null}
-                    </Col>
-                    <Col sm="auto">
+                        <div>
+                            <h5 style={{wordWrap: "break-word"}}>
+                                {this.props.task.description} 
+                            </h5>
+                            {this.props.task.notes 
+                                ? <Card.Text>{this.props.task.notes}</Card.Text>
+                                : null}
+                        </div>
+                    </div>
+                    <div style={{display: "flex", flexDirection: "row"}}>
+                        <div style={{display: "flex", flexFlow: "row-reverse wrap"}}>
+                            {!this.props.task.tags ? null : 
+                                this.props.task.tags.map(tag => 
+                                    <span key={tag.id} style={tag_style}>{tag.tag_name}</span>)}
+                        </div>
                         <DropdownButton alignRight variant="light" title="">
                             <Dropdown.Item onClick={this.handleEditing}>Edit</Dropdown.Item>
                             <Dropdown.Item onClick={() => this.props.handleDelete(this.props.task.id)}>Delete</Dropdown.Item>
                         </DropdownButton>
-                    </Col>
-                </Row>
+                    </div>
+                </div>
             </ListGroup.Item>
        );
     }
@@ -52,30 +66,34 @@ class ListItem extends React.Component {
         this.setState({ editing: false });
     }
     handleUpdateTask(task){
-        axios.put( '/api/v1/tasks/' + task.id, task)
+        if (task.tags){ // don't send tags to server if not changed
+            const s1 = JSON.stringify(this.props.task.tags.map(t => t.id).sort());
+            const s2 = JSON.stringify(task.tags.map(t => t.id).sort());
+            if (s1 === s2) task.tags = undefined;
+        }
+        log.debug("Sending request to server: UPDATE task")
+        log.debug(task);
+        axios.put( '/api/v1/tasks/' + this.props.task.id, task)
             .then(response => {
-                this.props.handleTaskUpdated(task);
+                log.debug("Server response: task updated");
+                log.debug(response.data);
+                const newTask = response.data.task;
+                newTask.tags = response.data.tags;
+                this.props.handleTaskUpdated(newTask, response.data.createdTags, response.data.deletedTags);
                 this.handleNotEditing();
             })
             .catch(error => console.log(error));
     }
-    handleEdit(task){
-        const newTask = {...this.props.task};
-        newTask.description = task.description;
-        newTask.notes = task.notes;
-        this.handleUpdateTask(newTask);
-    }
     toggleCompleted(){
-        const newTask = {...this.props.task};
-        newTask.completed = !this.props.task.completed;
-        this.handleUpdateTask(newTask);
+        this.handleUpdateTask({completed: !this.props.task.completed});
     }
     render() {
         return this.state.editing 
             ? <TaskForm submit_btn_txt="Save" 
                     handleCancel={this.handleNotEditing}
-                    handleSubmit={this.handleEdit}
-                    task={this.props.task} />
+                    handleSubmit={this.handleUpdateTask}
+                    task={this.props.task} 
+                    all_tags={this.props.all_tags}/>
             : this.getLayout();
     }
 }

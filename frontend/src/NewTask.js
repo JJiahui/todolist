@@ -3,6 +3,9 @@ import ListGroup from 'react-bootstrap/ListGroup';
 import { FaPlus } from 'react-icons/fa';
 import axios from 'axios';
 import TaskForm from './TaskForm';
+import * as log from 'loglevel';
+
+log.setDefaultLevel("debug");
 
 class NewTask extends React.Component {
     constructor(props){
@@ -13,10 +16,16 @@ class NewTask extends React.Component {
         this.handleNotCreating = this.handleNotCreating.bind(this);
     }
     handleCreateTask(task){
+        log.debug("Sending request to server: CREATE task")
+        log.debug(task);
         axios.post( '/api/v1/tasks', task)
             .then(response => {
-                this.props.handleTaskCreated(response.data);
-                this.setState({ creating: false});
+                log.debug("Server response: task created");
+                log.debug(response.data);
+                const newTask = response.data.task;
+                newTask.tags = response.data.createdTags.concat(response.data.existingTags);
+                this.props.handleTaskCreated(newTask, response.data.createdTags);
+                this.handleNotCreating();
             })
             .catch(error => {
                 console.log(error)
@@ -41,7 +50,8 @@ class NewTask extends React.Component {
                 ? <TaskForm submit_btn_txt="Create" 
                         handleCancel={this.handleNotCreating}
                         handleSubmit={this.handleCreateTask} 
-                        task={null}/>
+                        task={null}
+                        all_tags={this.props.all_tags}/>
                 : this.getBtnLayout()
         );
     }

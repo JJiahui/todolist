@@ -5,6 +5,13 @@
 #
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
-Task.create(description: "Wash dishes after dinner")
-Task.create(description: "Jog 30min")
-Task.create(description: "Read 30min before sleep")
+Task.all.each {|t| t.destroy}
+Tag.all.each {|t| t.destroy}
+
+task1 = Task.create(description: "Meditate 10min before sleep", notes: "Use new app")
+tag1 = task1.tags.create(:tag_name => "Health")
+task1.tags.create(:tag_name => "Relax")
+task2 = Task.create(description: "Eat fruits")
+task2.tags << tag1
+task2.tags.create(:tag_name => "Food")
+Task.create(description: "Do nothing", notes: "I need some boredom")
