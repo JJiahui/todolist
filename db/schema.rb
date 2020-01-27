@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_01_05_060439) do
+ActiveRecord::Schema.define(version: 2020_01_27_114716) do
 
   create_table "tag_tasks", force: :cascade do |t|
     t.integer "tag_id", null: false
@@ -33,6 +33,8 @@ ActiveRecord::Schema.define(version: 2020_01_05_060439) do
     t.boolean "completed"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.date "due_date"
+    t.datetime "due_time"
   end
 
   add_foreign_key "tag_tasks", "tags"

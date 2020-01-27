@@ -7,6 +7,7 @@ import Dropdown from 'react-bootstrap/Dropdown'
 import TaskForm from './TaskForm';
 import axios from 'axios';
 import * as log from 'loglevel';
+import { format } from 'date-fns';
 
 
 const tag_style = {
@@ -39,9 +40,15 @@ class ListItem extends React.Component {
                             <h5 style={{wordWrap: "break-word"}}>
                                 {this.props.task.description} 
                             </h5>
-                            {this.props.task.notes 
-                                ? <Card.Text>{this.props.task.notes}</Card.Text>
-                                : null}
+                            <h6>
+                                {this.props.task.notes 
+                                    ? <Card.Text>{this.props.task.notes}</Card.Text>
+                                    : null}
+                            </h6>
+                                {this.props.task.due_date 
+                                    ? "Due by: " + format(this.props.task.due_date, "do LLLL yyyy") : null}
+                                {this.props.task.due_time 
+                                    ? ", at " + format(this.props.task.due_time, "hh:mm a") : null}
                         </div>
                     </div>
                     <div style={{display: "flex", flexDirection: "row"}}>
@@ -78,6 +85,8 @@ class ListItem extends React.Component {
                 log.debug("Server response: task updated");
                 log.debug(response.data);
                 const newTask = response.data.task;
+                newTask.due_date = newTask.due_date ? new Date(newTask.due_date): null;
+                newTask.due_time = newTask.due_time ? new Date(newTask.due_time): null;
                 newTask.tags = response.data.tags;
                 this.props.handleTaskUpdated(newTask, response.data.createdTags, response.data.deletedTags);
                 this.handleNotEditing();

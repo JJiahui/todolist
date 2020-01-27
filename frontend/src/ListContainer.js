@@ -23,6 +23,11 @@ class ListContainer extends React.Component {
             .then(response => {
                 log.debug("Server response: tasks data");
                 log.debug(response.data);
+                const tasks = response.data.map(t => {
+                    t.due_date = t.due_date ? new Date(t.due_date): null;
+                    t.due_time = t.due_time ? new Date(t.due_time): null;
+                    return t;
+                })
                 this.getTags();
                 this.setState({
                     tasks: response.data

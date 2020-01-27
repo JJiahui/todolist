@@ -3,25 +3,25 @@ import ListGroup from 'react-bootstrap/ListGroup';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button'
 import TagsInput from './TagsInput';
+import { KeyboardDatePicker, KeyboardTimePicker  } from "@material-ui/pickers";
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import DateFnsUtils from '@date-io/date-fns';
 
 class TaskForm extends React.Component {
     constructor(props){
         super(props);
-        // this.handleSubmit = this.handleSubmit.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.removeTag = this.removeTag.bind(this);
         this.addTag = this.addTag.bind(this);
-        this.state = this.props.task 
-            ? { description: this.props.task.description, notes:this.props.task.notes, 
-                tags: this.props.task.tags }
-            : { description: null, notes: null, tags: [] };
+        const t = this.props.task;
+        this.state = t 
+            ? { description: t.description, notes: t.notes, 
+                tags: t.tags, due_date: t.due_date, due_time: t.due_time}
+            : { description: null, notes: null, tags: [], due_date: null, due_time: null};
     }
     handleChange(e){
         this.setState({[e.target.name]: e.target.value})
     }
-    // handleSubmit(){
-    //     this.props.handleSubmit(this.state);
-    // }
     addTag(newTag){
         const newState = {tags: [...this.state.tags, newTag]};
         this.setState(newState);
@@ -51,6 +51,33 @@ class TaskForm extends React.Component {
                             placeholder="How can you help yourself accomplish this?"
                             defaultValue={ this.props.task ? this.props.task.notes : "" }/>
                     </Form.Group>
+        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                    <Form.Group>
+                        <Form.Label> Due-by: </Form.Label>
+                        <div>
+                            <KeyboardDatePicker clearable disablePast autoOk
+                                format="dd/MM/yyyy"
+                                placeholder="dd/MM/yyyy"
+                                inputVariant="outlined"
+                                value={this.state.due_date} 
+                                onChange={date => {
+                                    if (date === null){
+                                        this.setState({due_date: date, due_time: null});
+                                    } else {
+                                        this.setState({due_date: date});
+                                    }
+                                } }/>
+                            {" "}
+                            <KeyboardTimePicker clearable 
+                                disabled={this.state.due_date === null}
+                                placeholder="00:00 AM"
+                                inputVariant="outlined"
+                                value={this.state.due_time} 
+                                minutesStep={5}
+                                onChange={date => { this.setState({due_time: date});}}/>
+                        </div>
+                    </Form.Group>
+        </MuiPickersUtilsProvider>
                     <TagsInput tags={this.state.tags} removeTag={this.removeTag} addTag={this.addTag}
                                 all_tags={this.props.all_tags}/>
                 </Form> 

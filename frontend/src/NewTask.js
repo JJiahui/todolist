@@ -23,6 +23,8 @@ class NewTask extends React.Component {
                 log.debug("Server response: task created");
                 log.debug(response.data);
                 const newTask = response.data.task;
+                newTask.due_date = newTask.due_date ? new Date(newTask.due_date): null;
+                newTask.due_time = newTask.due_time ? new Date(newTask.due_time): null;
                 newTask.tags = response.data.createdTags.concat(response.data.existingTags);
                 this.props.handleTaskCreated(newTask, response.data.createdTags);
                 this.handleNotCreating();
