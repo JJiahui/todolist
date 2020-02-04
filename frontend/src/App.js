@@ -1,7 +1,7 @@
 import React from 'react';
 // import './App.css';
 import Jumbotron from "react-bootstrap/Jumbotron";
-import ListContainer from './ListContainer';
+import ListContainer from './components/ListContainer';
 
 
 function App() {

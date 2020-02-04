@@ -64,6 +64,7 @@ class TaskForm extends React.Component {
                                     if (date === null){
                                         this.setState({due_date: date, due_time: null});
                                     } else {
+                                        date.setHours(23, 59, 59);
                                         this.setState({due_date: date});
                                     }
                                 } }/>
@@ -74,7 +75,13 @@ class TaskForm extends React.Component {
                                 inputVariant="outlined"
                                 value={this.state.due_time} 
                                 minutesStep={5}
-                                onChange={date => { this.setState({due_time: date});}}/>
+                                onChange={date => {
+                                    const d = this.state.due_date;
+                                    date.setDate(d.getDate());
+                                    date.setMonth(d.getMonth());
+                                    date.setFullYear(d.getFullYear());
+                                    this.setState({due_time: date});
+                                    }}/>
                         </div>
                     </Form.Group>
         </MuiPickersUtilsProvider>

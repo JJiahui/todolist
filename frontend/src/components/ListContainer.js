@@ -5,14 +5,19 @@ import ListItem from './ListItem';
 import Card from 'react-bootstrap/Card';
 import NewTask from './NewTask';
 import * as log from 'loglevel';
+import ListMenuBar from './ListMenuBar';
+import { isBefore, isAfter } from 'date-fns';
 
 class ListContainer extends React.Component {
     constructor(props){
         super(props);
-        this.state = {tasks: [], all_tags: []};
+        this.state = {tasks: [], all_tags: [], filter: "Current", showCompleted: true, search_key: ""};
         this.handleTaskCreated = this.handleTaskCreated.bind(this);
         this.handleTaskUpdated = this.handleTaskUpdated.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
+        this.handleFilterChange = this.handleFilterChange.bind(this);
+        this.toggleShowCompleted = this.toggleShowCompleted.bind(this);
+        this.setSearchKey = this.setSearchKey.bind(this);
     }
     componentDidMount() {
         this.getTasks();
@@ -98,21 +103,65 @@ class ListContainer extends React.Component {
             })
             .catch(error => console.log(error));
     }
+    handleFilterChange(eventKey, e){
+        this.setState({filter: eventKey});
+    }
+    toggleShowCompleted(){
+        this.setState({showCompleted: !this.state.showCompleted});
+    }
+    getListItems(tasks, showCompleted, search_key){
+        let temp = showCompleted ? tasks: tasks.filter(task => !task.completed);
+        temp = search_key !== "" ? this.getSearchedTasks(temp, search_key) : temp;
+        return temp.map(task =>
+            <ListItem task={task} key={task.id}
+                handleDelete={this.handleDelete}
+                handleTaskUpdated={this.handleTaskUpdated}
+                all_tags={this.state.all_tags}/>);
+    }
+    getFiltered(compare){
+        const now = new Date();
+        return this.state.tasks.filter(task => {
+            return !task.due_date ||
+                (task.due_time
+                    ? compare(task.due_time, now)
+                    : task.due_date && compare(task.due_date, now));
+        });
+    }
+    setSearchKey(search_key){
+        this.setState({search_key});
+    }
+    getSearchedTasks(tasks, key){
+        key = key.trim().toLowerCase();
+        return tasks.filter(task =>
+            (task.description && task.description.toLowerCase().includes(key))
+                || (task.notes && task.notes.toLowerCase().includes(key))
+                || (task.tags && task.tags.find(tag => tag.tag_name.toLowerCase().includes(key)))
+        );
+    }
     render() {
         return (
             <div>
                 {/* <Card style={{width: "50%", minWidth: "500px"}}> */}
                 <Card>
-                    <Card.Header as="h3">My Todo List</Card.Header>
+                    <ListMenuBar
+                        showCompleted={this.state.showCompleted}
+                        filter={this.state.filter}
+                        handleFilterChange={this.handleFilterChange}
+                        toggleShowCompleted={this.toggleShowCompleted}
+                        setSearchKey={this.setSearchKey}
+                        search_key={this.state.search_key}
+                        />
+                    {/* <Card.Header as="h3">My Todo List</Card.Header> */}
                     <ListGroup variant="flush">
-                        {this.state.tasks.map(task => {
-                            return (
-                                <ListItem task={task} key={task.id} 
-                                    handleDelete={this.handleDelete}
-                                    handleTaskUpdated={this.handleTaskUpdated}
-                                    all_tags={this.state.all_tags}/>
-                            );
-                        })}
+                        {
+                            this.getListItems(
+                                this.state.filter === "Current"
+                                    ? this.getFiltered(isAfter)
+                                    : this.state.filter === "Past"
+                                        ? this.getFiltered(isBefore)
+                                        : this.state.tasks,
+                                this.state.showCompleted, this.state.search_key)
+                        }
                         <NewTask handleTaskCreated={this.handleTaskCreated} all_tags={this.state.all_tags} />
                     </ListGroup>
                 </Card>
