@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import Form from 'react-bootstrap/Form';
 import { FaTimes } from 'react-icons/fa';
+import Tag from './Tag';
 // import "./TagsInput.css";
 
-const tag_style = {
+const tag_style: CSSProperties = {
 	height: "32px",
 	display: "flex",
 	alignItems: "center",
@@ -17,10 +18,10 @@ const tag_style = {
     background: "#dddddd"
     // background: "#0052cc"
 };
-const tag_title_style =  {
+const tag_title_style: CSSProperties =  {
 		marginTop: "3px"
 };
-const tag_close_icon_style = {
+const tag_close_icon_style: CSSProperties = {
 		display: "block",
 		width: "16px",
 		height: "16px",
@@ -34,13 +35,13 @@ const tag_close_icon_style = {
 		cursor: "pointer"
 };
 
-const tags_style =  {
+const tags_style: CSSProperties =  {
 	display: "flex",
 	flexWrap: "wrap",
 	padding: "0",
 	margin: "8px 0 0 0"
 };
-const input_style = {
+const input_style: CSSProperties = {
 		flex: "1",
 		border: "none",
 		height: "46px",
@@ -48,7 +49,7 @@ const input_style = {
 		padding: "4px 0 0 0",
         outline: "transparent"
     };
-const tags_input_style = {
+const tags_input_style: CSSProperties = {
 	display: "flex",
 	alignItems: "flex-start",
 	flexWrap: "wrap",
@@ -62,18 +63,26 @@ const tags_input_style = {
 
 
 
+interface TagsInputState {
+    newTagId: number;
+}
+interface TagsInputProps {
+    tags: any;
+    all_tags: any;
+    removeTag: (id: number) => void;
+    addTag: (newTag: Tag) => void;
+}
 
-
-class TagsInput extends React.Component {
-    constructor(props){
+class TagsInput extends React.Component<TagsInputProps, TagsInputState>{
+    constructor(props: TagsInputProps){
         super(props);
         this.state = {newTagId: -1};
     }
-    addTag(event){
-        const newTagName = event.target.value.trim();
+    addTag(event: React.KeyboardEvent<HTMLInputElement>){
+        const newTagName: string = (event.target as HTMLInputElement).value.trim();
         if (newTagName !== ""){
-            event.target.value = "";
-            if (this.props.tags.find(tag => tag.tag_name === newTagName) === undefined){
+            (event.target as HTMLInputElement).value = "";
+            if (this.props.tags.find((tag: Tag) => tag.tag_name === newTagName) === undefined){
                 let newTag;
                 if (this.props.all_tags[newTagName] === undefined){
                     newTag = {id: this.state.newTagId, tag_name: newTagName};
@@ -91,7 +100,7 @@ class TagsInput extends React.Component {
                 <Form.Label> Tags: </Form.Label>
                 <div className="tags-input" style={tags_input_style}>
                     <ul id="tags" style={tags_style}>
-                        {!this.props.tags ? null : this.props.tags.map(tag => (
+                        {!this.props.tags ? null : this.props.tags.map((tag: Tag) => (
                             <li key={tag.id} className="tag" style={tag_style}>
                                 <span className='tag-title' style={tag_title_style}>{tag.tag_name}</span>
                                 <span className='tag-close-icon' style={tag_close_icon_style}

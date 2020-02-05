@@ -7,9 +7,19 @@ import NewTask from './NewTask';
 import * as log from 'loglevel';
 import ListMenuBar from './ListMenuBar';
 import { isBefore, isAfter } from 'date-fns';
+import Tag from "./Tag";
+import Task from "./Task";
 
-class ListContainer extends React.Component {
-    constructor(props){
+interface ListContainerState {
+    tasks: Task[];
+    all_tags: any;
+    filter: "Current" | "All" | "Past";
+    showCompleted: boolean;
+    search_key: string;
+}
+
+class ListContainer extends React.Component<{}, ListContainerState> {
+    constructor(props: any){
         super(props);
         this.state = {tasks: [], all_tags: [], filter: "Current", showCompleted: true, search_key: ""};
         this.handleTaskCreated = this.handleTaskCreated.bind(this);
@@ -28,15 +38,13 @@ class ListContainer extends React.Component {
             .then(response => {
                 log.debug("Server response: tasks data");
                 log.debug(response.data);
-                const tasks = response.data.map(t => {
+                const tasks = response.data.map((t: Task) => {
                     t.due_date = t.due_date ? new Date(t.due_date): null;
                     t.due_time = t.due_time ? new Date(t.due_time): null;
                     return t;
                 })
                 this.getTags();
-                this.setState({
-                    tasks: response.data
-                });
+                this.setState({ tasks });
             })
             .catch(error => console.log(error));
     }
@@ -50,8 +58,8 @@ class ListContainer extends React.Component {
                     task.tags = tags_data[i];
                     return task;
                 });
-                const newTags = {};
-                tags_data.slice(newTasks.length).forEach(tag => {
+                const newTags: any = {};
+                tags_data.slice(newTasks.length).forEach((tag: Tag) => {
                     newTags[tag.tag_name] = tag.id;
                 });
                 log.debug(newTags);
@@ -63,30 +71,30 @@ class ListContainer extends React.Component {
             })
             .catch(error => console.log(error));
     }
-    handleTaskCreated(task, createdTags){
+    handleTaskCreated(task: Task, createdTags: Tag[]){
         const newTasks = [ ...this.state.tasks, task ];
         const newTags = {...this.state.all_tags};
-        createdTags.forEach(tag => {
+        createdTags.forEach((tag: Tag) => {
             newTags[tag.tag_name] = tag.id;
         });
         this.setState({tasks: newTasks, all_tags: newTags});
     }
-    handleTaskUpdated(task, createdTags, deletedTags){
+    handleTaskUpdated(task: Task, createdTags: Tag[], deletedTags: Tag[]){
         const newTasks = this.state.tasks.filter(e => true);
         const task_index = newTasks.findIndex(e => e.id === task.id);
         newTasks[task_index] = task;
 
         const newTags = {...this.state.all_tags};
-        createdTags.forEach(tag => {
+        createdTags.forEach((tag: Tag) => {
             newTags[tag.tag_name] = tag.id;
         });
-        deletedTags.forEach(tag => {
+        deletedTags.forEach((tag: Tag) => {
             newTags[tag.tag_name] = undefined;
         });
 
         this.setState({ tasks: newTasks, all_tags: newTags});
     }
-    handleDelete(id){
+    handleDelete(id?: number){
         log.debug("Sending request to server: DELETE task")
         axios.delete( '/api/v1/tasks/' + id )
             .then(response => {
@@ -96,20 +104,22 @@ class ListContainer extends React.Component {
                     task => task.id !== id
                 );
                 const newTags = {...this.state.all_tags};
-                response.data.deletedTags.forEach(tag => {
+                response.data.deletedTags.forEach((tag: Tag) => {
                     newTags[tag.tag_name] = undefined;
                 });
                 this.setState({tasks: newTasks, all_tags: newTags});
             })
             .catch(error => console.log(error));
     }
-    handleFilterChange(eventKey, e){
-        this.setState({filter: eventKey});
+    handleFilterChange(eventKey: string, e: any){
+        if (eventKey === "Current" || eventKey === "All" || eventKey === "Past"){
+            this.setState({filter: eventKey});
+        }
     }
     toggleShowCompleted(){
         this.setState({showCompleted: !this.state.showCompleted});
     }
-    getListItems(tasks, showCompleted, search_key){
+    getListItems(tasks: Task[], showCompleted: boolean, search_key: string){
         let temp = showCompleted ? tasks: tasks.filter(task => !task.completed);
         temp = search_key !== "" ? this.getSearchedTasks(temp, search_key) : temp;
         return temp.map(task =>
@@ -118,7 +128,7 @@ class ListContainer extends React.Component {
                 handleTaskUpdated={this.handleTaskUpdated}
                 all_tags={this.state.all_tags}/>);
     }
-    getFiltered(compare){
+    getFiltered(compare: (d1: Date, d2:Date) => boolean){
         const now = new Date();
         return this.state.tasks.filter(task => {
             return !task.due_date ||
@@ -127,15 +137,15 @@ class ListContainer extends React.Component {
                     : task.due_date && compare(task.due_date, now));
         });
     }
-    setSearchKey(search_key){
+    setSearchKey(search_key: string){
         this.setState({search_key});
     }
-    getSearchedTasks(tasks, key){
+    getSearchedTasks(tasks: Task[], key: string){
         key = key.trim().toLowerCase();
-        return tasks.filter(task =>
+        return tasks.filter((task: Task) =>
             (task.description && task.description.toLowerCase().includes(key))
                 || (task.notes && task.notes.toLowerCase().includes(key))
-                || (task.tags && task.tags.find(tag => tag.tag_name.toLowerCase().includes(key)))
+                || (task.tags && task.tags.find((tag: Tag) => tag.tag_name.toLowerCase().includes(key)))
         );
     }
     render() {

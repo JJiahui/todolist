@@ -10,10 +10,16 @@ import InputGroup from 'react-bootstrap/InputGroup';
 
 log.setDefaultLevel("debug");
 
-class ListMenuBar extends React.Component {
-    constructor(props){
-        super(props);
-    }
+interface ListMenuBarProps {
+    filter: "Current" | "All" | "Past";
+    showCompleted: boolean;
+    search_key: string;
+    handleFilterChange: (eventKey: string, e: any) => void;
+    toggleShowCompleted: () => void;
+    setSearchKey: (search_key: string) => void;
+}
+
+class ListMenuBar extends React.Component<ListMenuBarProps, {}>  {
     render() {
         return (
             <Card.Header>
@@ -21,7 +27,7 @@ class ListMenuBar extends React.Component {
                     <span style={{fontSize:"24px"}}> My Todo List </span>
                     <div>
                         <div style={{display: "flex", marginBottom: "6px"}}>
-                        <DropdownButton alignRight variant="light" title={this.props.filter}>
+                        <DropdownButton id="" alignRight variant="light" title={this.props.filter}>
                             <Dropdown.Item active={this.props.filter === "Current"} eventKey="Current" onSelect={this.props.handleFilterChange}>Current</Dropdown.Item>
                             <Dropdown.Item active={this.props.filter === "All"} eventKey="All" onSelect={this.props.handleFilterChange}>All</Dropdown.Item>
                             <Dropdown.Item active={this.props.filter === "Past"} eventKey="Past" onSelect={this.props.handleFilterChange}>Past</Dropdown.Item>
@@ -33,7 +39,7 @@ class ListMenuBar extends React.Component {
                         </div>
                         </div>
                         <InputGroup>
-                            <FormControl placeholder="Search..." onChange={e => this.props.setSearchKey(e.target.value)} value={this.props.search_key}/>
+                            <FormControl placeholder="Search..." onChange={(e: React.KeyboardEvent<HTMLInputElement>) => this.props.setSearchKey((e.target as HTMLInputElement).value)} value={this.props.search_key}/>
                             <InputGroup.Append>
                                 <Button onClick={() => this.props.setSearchKey("")} variant="outline-secondary">X</Button>
                             </InputGroup.Append>

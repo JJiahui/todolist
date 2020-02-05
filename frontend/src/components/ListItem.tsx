@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Form from 'react-bootstrap/Form'
 import Card from 'react-bootstrap/Card'
@@ -8,9 +8,11 @@ import TaskForm from './TaskForm';
 import axios from 'axios';
 import * as log from 'loglevel';
 import { format } from 'date-fns';
+import Task from './Task';
+import Tag from "./Tag";
 
 
-const tag_style = {
+const tag_style: CSSProperties = {
 	height: "26px",
 	textAlign: "center",
 	padding: "0 8px",
@@ -20,8 +22,18 @@ const tag_style = {
     background: "#eeeeee"
 };
 
-class ListItem extends React.Component {
-    constructor(props){
+interface ListItemProps {
+    task: Task;
+    all_tags: any;
+    handleDelete: (id?: number) => void;
+    handleTaskUpdated: (task: Task, createdTags: Tag[], deletedTags: Tag[]) => void;
+}
+interface ListItemState {
+    editing: boolean;
+}
+
+class ListItem extends React.Component<ListItemProps, ListItemState> {
+    constructor(props: ListItemProps){
         super(props);
         this.state = { editing: false };
         this.toggleCompleted = this.toggleCompleted.bind(this);
@@ -57,7 +69,7 @@ class ListItem extends React.Component {
                                 this.props.task.tags.map(tag => 
                                     <span key={tag.id} style={tag_style}>{tag.tag_name}</span>)}
                         </div>
-                        <DropdownButton alignRight variant="light" title="">
+                        <DropdownButton id="" alignRight variant="light" title="">
                             <Dropdown.Item onClick={this.handleEditing}>Edit</Dropdown.Item>
                             <Dropdown.Item onClick={() => this.props.handleDelete(this.props.task.id)}>Delete</Dropdown.Item>
                         </DropdownButton>
@@ -72,8 +84,8 @@ class ListItem extends React.Component {
     handleNotEditing(){
         this.setState({ editing: false });
     }
-    handleUpdateTask(task){
-        if (task.tags){ // don't send tags to server if not changed
+    handleUpdateTask(task: Task){
+        if (task.tags && this.props.task.tags){ // don't send tags to server if not changed
             const s1 = JSON.stringify(this.props.task.tags.map(t => t.id).sort());
             const s2 = JSON.stringify(task.tags.map(t => t.id).sort());
             if (s1 === s2) task.tags = undefined;

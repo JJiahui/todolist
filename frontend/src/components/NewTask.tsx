@@ -4,18 +4,28 @@ import { FaPlus } from 'react-icons/fa';
 import axios from 'axios';
 import TaskForm from './TaskForm';
 import * as log from 'loglevel';
+import Task from "./Task";
+import Tag from "./Tag";
 
 log.setDefaultLevel("debug");
 
-class NewTask extends React.Component {
-    constructor(props){
+interface NewTaskProps {
+    all_tags: any;
+    handleTaskCreated: (task: Task, createdTags: Tag[]) => void;
+}
+interface NewTaskState {
+    creating: boolean;
+}
+
+class NewTask extends React.Component<NewTaskProps, NewTaskState> {
+    constructor(props: NewTaskProps){
         super(props);
         this.state = { creating: false };
         this.handleCreateTask = this.handleCreateTask.bind(this);
         this.handleCreating = this.handleCreating.bind(this);
         this.handleNotCreating = this.handleNotCreating.bind(this);
     }
-    handleCreateTask(task){
+    handleCreateTask(task: Task){
         log.debug("Sending request to server: CREATE task")
         log.debug(task);
         axios.post( '/api/v1/tasks', task)

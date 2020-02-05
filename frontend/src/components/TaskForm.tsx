@@ -6,11 +6,29 @@ import TagsInput from './TagsInput';
 import { KeyboardDatePicker, KeyboardTimePicker  } from "@material-ui/pickers";
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
+import Tag from "./Tag";
+import Task from "./Task";
 
-class TaskForm extends React.Component {
-    constructor(props){
+interface TaskFormState {
+    description?: string | null;
+    notes?: string | null;
+    tags?: Tag[];
+    due_date?: Date | null;
+    due_time?: Date | null;
+}
+interface TaskFormProps {
+    task: Task | null;
+    all_tags: any;
+    submit_btn_txt: "Create" | "Save";
+    handleCancel: () => void;
+    handleSubmit: (task: Task) => void;
+}
+
+class TaskForm extends React.Component<TaskFormProps, TaskFormState> {
+    constructor(props: TaskFormProps){
         super(props);
-        this.handleChange = this.handleChange.bind(this);
+        this.handleDescriptionChange = this.handleDescriptionChange.bind(this);
+        this.handleNotesChange = this.handleNotesChange.bind(this);
         this.removeTag = this.removeTag.bind(this);
         this.addTag = this.addTag.bind(this);
         const t = this.props.task;
@@ -19,16 +37,23 @@ class TaskForm extends React.Component {
                 tags: t.tags, due_date: t.due_date, due_time: t.due_time}
             : { description: null, notes: null, tags: [], due_date: null, due_time: null};
     }
-    handleChange(e){
-        this.setState({[e.target.name]: e.target.value})
+    handleDescriptionChange(e: any){
+        this.setState({description: e.target.value});
     }
-    addTag(newTag){
-        const newState = {tags: [...this.state.tags, newTag]};
-        this.setState(newState);
+    handleNotesChange(e: any){
+        this.setState({notes: e.target.value});
     }
-    removeTag(id){
-        const newState = {tags: this.state.tags.filter(tag => tag.id !== id)};
-        this.setState(newState);
+    addTag(newTag: Tag){
+        if (this.state.tags){
+            const newState = {tags: [...this.state.tags, newTag]};
+            this.setState(newState);
+        }
+    }
+    removeTag(id: number){
+        if (this.state.tags){
+            const newState = {tags: this.state.tags.filter(tag => tag.id !== id)};
+            this.setState(newState);
+        }
     }
     render(){
         return (
@@ -36,18 +61,19 @@ class TaskForm extends React.Component {
                 <Form>
                     <Form.Group>
                         <Form.Label> Description: </Form.Label>
-                        <Form.Control ref='description'
+                        <Form.Control 
+                            // ref='description'
                             autoFocus
                             name="description"
-                            onChange={this.handleChange}
+                            onChange={this.handleDescriptionChange}
                             placeholder="What will you do?"
-                            defaultValue={ this.props.task ? this.props.task.description : "" }/>
+                            defaultValue={ this.props.task ? this.props.task.description ? this.props.task.description : "" : "" } />
                     </Form.Group>
                     <Form.Group>
                         <Form.Label> Notes: </Form.Label>
                         <Form.Control as="textarea" rows="3" ref='notes'
                             name="notes"
-                            onChange={this.handleChange}
+                            onChange={this.handleNotesChange}
                             placeholder="How can you help yourself accomplish this?"
                             defaultValue={ this.props.task ? this.props.task.notes : "" }/>
                     </Form.Group>
@@ -77,9 +103,11 @@ class TaskForm extends React.Component {
                                 minutesStep={5}
                                 onChange={date => {
                                     const d = this.state.due_date;
-                                    date.setDate(d.getDate());
-                                    date.setMonth(d.getMonth());
-                                    date.setFullYear(d.getFullYear());
+                                    if (date && d){
+                                        date.setDate(d.getDate());
+                                        date.setMonth(d.getMonth());
+                                        date.setFullYear(d.getFullYear());
+                                    }
                                     this.setState({due_time: date});
                                     }}/>
                         </div>
