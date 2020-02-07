@@ -13,6 +13,7 @@ import Tag from "./Tag";
 
 
 const tag_style: CSSProperties = {
+    cursor: "pointer",
 	height: "26px",
 	textAlign: "center",
 	padding: "0 8px",
@@ -26,7 +27,9 @@ interface ListItemProps {
     task: Task;
     all_tags: any;
     handleDelete: (id?: number) => void;
+    handleCreateTask: (task: Task, callback: null | (() => void)) => void;
     handleTaskUpdated: (task: Task, createdTags: Tag[], deletedTags: Tag[]) => void;
+    setSearchKey: (search_key: string) => void;
 }
 interface ListItemState {
     editing: boolean;
@@ -67,9 +70,11 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
                         <div style={{display: "flex", flexFlow: "row-reverse wrap"}}>
                             {!this.props.task.tags ? null : 
                                 this.props.task.tags.map(tag => 
-                                    <span key={tag.id} style={tag_style}>{tag.tag_name}</span>)}
+                                    <span onClick={() => this.props.setSearchKey(tag.tag_name)}
+                                        key={tag.id} style={tag_style}>{tag.tag_name}</span>)}
                         </div>
                         <DropdownButton id="" alignRight variant="light" title="">
+                            <Dropdown.Item onClick={() => this.props.handleCreateTask(this.props.task, null)}>Duplicate</Dropdown.Item>
                             <Dropdown.Item onClick={this.handleEditing}>Edit</Dropdown.Item>
                             <Dropdown.Item onClick={() => this.props.handleDelete(this.props.task.id)}>Delete</Dropdown.Item>
                         </DropdownButton>

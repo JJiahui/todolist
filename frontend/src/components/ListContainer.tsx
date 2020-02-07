@@ -22,6 +22,7 @@ class ListContainer extends React.Component<{}, ListContainerState> {
     constructor(props: any){
         super(props);
         this.state = {tasks: [], all_tags: [], filter: "Current", showCompleted: true, search_key: ""};
+        this.handleCreateTask = this.handleCreateTask.bind(this);
         this.handleTaskCreated = this.handleTaskCreated.bind(this);
         this.handleTaskUpdated = this.handleTaskUpdated.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
@@ -124,8 +125,10 @@ class ListContainer extends React.Component<{}, ListContainerState> {
         temp = search_key !== "" ? this.getSearchedTasks(temp, search_key) : temp;
         return temp.map(task =>
             <ListItem task={task} key={task.id}
+                handleCreateTask={this.handleCreateTask}
                 handleDelete={this.handleDelete}
                 handleTaskUpdated={this.handleTaskUpdated}
+                setSearchKey={this.setSearchKey}
                 all_tags={this.state.all_tags}/>);
     }
     getFiltered(compare: (d1: Date, d2:Date) => boolean){
@@ -147,6 +150,29 @@ class ListContainer extends React.Component<{}, ListContainerState> {
                 || (task.notes && task.notes.toLowerCase().includes(key))
                 || (task.tags && task.tags.find((tag: Tag) => tag.tag_name.toLowerCase().includes(key)))
         );
+    }
+    handleCreateTask(t: Task, callback: (() => void) | null){
+        const task: Task = {...t};
+        task.id = undefined;
+        task.completed = undefined;
+        log.debug("Sending request to server: CREATE task")
+        log.debug(task);
+        axios.post( '/api/v1/tasks', task)
+            .then(response => {
+                log.debug("Server response: task created");
+                log.debug(response.data);
+                const newTask = response.data.task;
+                newTask.due_date = newTask.due_date ? new Date(newTask.due_date): null;
+                newTask.due_time = newTask.due_time ? new Date(newTask.due_time): null;
+                newTask.tags = response.data.createdTags.concat(response.data.existingTags);
+                this.handleTaskCreated(newTask, response.data.createdTags);
+                if (callback) {
+                    callback();
+                }
+            })
+            .catch(error => {
+                console.log(error)
+            });
     }
     render() {
         return (
@@ -172,7 +198,9 @@ class ListContainer extends React.Component<{}, ListContainerState> {
                                         : this.state.tasks,
                                 this.state.showCompleted, this.state.search_key)
                         }
-                        <NewTask handleTaskCreated={this.handleTaskCreated} all_tags={this.state.all_tags} />
+                        <NewTask
+                            handleCreateTask={this.handleCreateTask}
+                            handleTaskCreated={this.handleTaskCreated} all_tags={this.state.all_tags} />
                     </ListGroup>
                 </Card>
             </div>
