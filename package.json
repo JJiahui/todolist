@@ -1,0 +1,19 @@
+{
+  "name": "todolist",
+  "version": "1.0.0",
+  "description": "React frontend of todolist",
+  "main": "index.js",
+  "repository": "https://github.com/JJiahui/todolist.git",
+  "author": "JJiahui <jiangjiahui2048@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "cd frontend && yarn install && yarn build && cd ..",
+    "deploy": "cp -a frontend/build/. public/",
+    "postinstall": "yarn build && yarn deploy && echo 'frontend built!'"
+  },
+  "engines": {
+    "yarn": "1.21.1",
+    "npm": "6.4.1",
+    "node": "10.15.3"
+  }
+}

@@ -22,3 +22,4 @@ rake db:seed
 foreman start -f Procfile.dev # make sure the foreman gem is installed
 ```
 
+[Click here for demo.](https://todolist-jjiahui.herokuapp.com)

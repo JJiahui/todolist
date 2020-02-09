@@ -1,0 +1,36 @@
+Arguments: 
+  /home/jjiahui/.nvm/versions/node/v10.15.3/bin/node /usr/share/yarn/bin/yarn.js init
+
+PATH: 
+  /home/jjiahui/.rbenv/shims:/home/jjiahui/.rbenv/bin:/home/jjiahui/.vscode-server/bin/ae08d5460b5a45169385ff3fd44208f431992451/bin:/home/jjiahui/.local/bin:/home/jjiahui/.rbenv/shims:/home/jjiahui/.rbenv/bin:/home/jjiahui/.nvm/versions/node/v10.15.3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/mnt/c/Program Files (x86)/Intel/Intel(R) Management Engine Components/iCLS/:/mnt/c/Program Files/Intel/Intel(R) Management Engine Components/iCLS/:/mnt/c/Windows/system32:/mnt/c/Windows:/mnt/c/Windows/System32/Wbem:/mnt/c/Windows/System32/WindowsPowerShell/v1.0/:/mnt/c/Windows/System32/OpenSSH/:/mnt/c/Program Files (x86)/NVIDIA Corporation/PhysX/Common:/mnt/c/Program Files (x86)/Intel/Intel(R) Management Engine Components/DAL:/mnt/c/Program Files/Intel/Intel(R) Management Engine Components/DAL:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/c/Program Files/Intel/WiFi/bin/:/mnt/c/Program Files/Common Files/Intel/WirelessCommon/:/mnt/c/Users/Jiahui/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/Jiahui/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/Program Files/Java/jdk-11.0.2/bin:/mnt/c/Program Files/JetBrains/IntelliJ IDEA 2019.3.1/bin:/mnt/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2019.3.2/bin:/snap/bin
+
+Yarn version: 
+  1.21.1
+
+Node version: 
+  10.15.3
+
+Platform: 
+  linux x64
+
+Trace: 
+  Error: canceled
+      at Interface.<anonymous> (/usr/share/yarn/lib/cli.js:136925:13)
+      at Interface.emit (events.js:189:13)
+      at Interface._ttyWrite (readline.js:783:16)
+      at ReadStream.onkeypress (readline.js:168:10)
+      at ReadStream.emit (events.js:189:13)
+      at emitKeys (internal/readline.js:424:14)
+      at emitKeys.next (<anonymous>)
+      at ReadStream.onData (readline.js:1022:36)
+      at ReadStream.emit (events.js:189:13)
+      at addChunk (_stream_readable.js:284:12)
+
+npm manifest: 
+  No manifest
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
