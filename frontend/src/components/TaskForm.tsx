@@ -8,6 +8,7 @@ import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import Tag from "./Tag";
 import Task from "./Task";
+import * as log from 'loglevel';
 
 interface TaskFormState {
     description?: string | null;
@@ -15,6 +16,7 @@ interface TaskFormState {
     tags?: Tag[];
     due_date?: Date | null;
     due_time?: Date | null;
+    submitted: boolean;
 }
 interface TaskFormProps {
     task: Task | null;
@@ -29,13 +31,16 @@ class TaskForm extends React.Component<TaskFormProps, TaskFormState> {
         super(props);
         this.handleDescriptionChange = this.handleDescriptionChange.bind(this);
         this.handleNotesChange = this.handleNotesChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
         this.removeTag = this.removeTag.bind(this);
         this.addTag = this.addTag.bind(this);
         const t = this.props.task;
         this.state = t 
             ? { description: t.description, notes: t.notes, 
-                tags: t.tags, due_date: t.due_date, due_time: t.due_time}
-            : { description: null, notes: null, tags: [], due_date: null, due_time: null};
+                tags: t.tags, due_date: t.due_date, due_time: t.due_time,
+                submitted: false}
+            : { description: null, notes: null, tags: [], due_date: null, due_time: null,
+                submitted: false};
     }
     handleDescriptionChange(e: any){
         this.setState({description: e.target.value});
@@ -55,6 +60,15 @@ class TaskForm extends React.Component<TaskFormProps, TaskFormState> {
             this.setState(newState);
         }
     }
+    handleSubmit(){
+        log.debug("Submitting description:")
+        log.debug(this.state.description);
+        if (!this.state.description || (this.state.description && this.state.description.trim() === "")){
+            this.setState({submitted: true});
+        } else {
+            this.props.handleSubmit(this.state);
+        }
+    }
     render(){
         return (
             <ListGroup.Item>
@@ -64,10 +78,16 @@ class TaskForm extends React.Component<TaskFormProps, TaskFormState> {
                         <Form.Control 
                             // ref='description'
                             autoFocus
+                            isValid={false}
+                            isInvalid={(!this.state.description || this.state.description.trim() === "")
+                                        && this.state.submitted}
                             name="description"
                             onChange={this.handleDescriptionChange}
                             placeholder="What will you do?"
                             defaultValue={ this.props.task ? this.props.task.description ? this.props.task.description : "" : "" } />
+                        <Form.Control.Feedback type="invalid">
+                            The description cannot be empty.
+                        </Form.Control.Feedback>
                     </Form.Group>
                     <Form.Group>
                         <Form.Label> Notes: </Form.Label>
@@ -116,7 +136,7 @@ class TaskForm extends React.Component<TaskFormProps, TaskFormState> {
                     <TagsInput tags={this.state.tags} removeTag={this.removeTag} addTag={this.addTag}
                                 all_tags={this.props.all_tags}/>
                 </Form> 
-                        <Button variant="dark" onClick={() => this.props.handleSubmit(this.state)}>{this.props.submit_btn_txt}</Button>{" "}
+                        <Button variant="dark" onClick={this.handleSubmit}>{this.props.submit_btn_txt}</Button>{" "}
                         <Button variant="dark" onClick={this.props.handleCancel}>Cancel</Button>
             </ListGroup.Item>
         );

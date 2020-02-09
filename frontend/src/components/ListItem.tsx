@@ -10,7 +10,8 @@ import * as log from 'loglevel';
 import { format } from 'date-fns';
 import Task from './Task';
 import Tag from "./Tag";
-
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 
 const tag_style: CSSProperties = {
     cursor: "pointer",
@@ -33,16 +34,36 @@ interface ListItemProps {
 }
 interface ListItemState {
     editing: boolean;
+    deleting: boolean;
 }
 
 class ListItem extends React.Component<ListItemProps, ListItemState> {
     constructor(props: ListItemProps){
         super(props);
-        this.state = { editing: false };
+        this.state = { editing: false, deleting: false};
         this.toggleCompleted = this.toggleCompleted.bind(this);
         this.handleEditing = this.handleEditing.bind(this);
         this.handleNotEditing = this.handleNotEditing.bind(this);
         this.handleUpdateTask = this.handleUpdateTask.bind(this);
+        this.handleDelete = this.handleDelete.bind(this);
+    }
+    getTaskDetailsLayout(){
+        return (
+            <div>
+                <h5 style={{wordWrap: "break-word"}}>
+                    {this.props.task.description}
+                </h5>
+                <h6>
+                    {this.props.task.notes
+                        ? <Card.Text>{this.props.task.notes}</Card.Text>
+                        : null}
+                </h6>
+                    {this.props.task.due_date
+                        ? "Due by: " + format(this.props.task.due_date, "do LLLL yyyy") : null}
+                    {this.props.task.due_time
+                        ? ", at " + format(this.props.task.due_time, "hh:mm a") : null}
+            </div>);
+
     }
     getLayout(){
        return (
@@ -51,20 +72,7 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
                     <div style={{display: "flex", flexDirection: "row", marginRight: "10px"}}>
                         <Form.Check type="checkbox" defaultChecked={this.props.task.completed}
                             onClick={this.toggleCompleted} />
-                        <div>
-                            <h5 style={{wordWrap: "break-word"}}>
-                                {this.props.task.description} 
-                            </h5>
-                            <h6>
-                                {this.props.task.notes 
-                                    ? <Card.Text>{this.props.task.notes}</Card.Text>
-                                    : null}
-                            </h6>
-                                {this.props.task.due_date 
-                                    ? "Due by: " + format(this.props.task.due_date, "do LLLL yyyy") : null}
-                                {this.props.task.due_time 
-                                    ? ", at " + format(this.props.task.due_time, "hh:mm a") : null}
-                        </div>
+                        {this.getTaskDetailsLayout()}
                     </div>
                     <div style={{display: "flex", flexDirection: "row"}}>
                         <div style={{display: "flex", flexFlow: "row-reverse wrap"}}>
@@ -76,12 +84,32 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
                         <DropdownButton id="" alignRight variant="light" title="">
                             <Dropdown.Item onClick={() => this.props.handleCreateTask(this.props.task, null)}>Duplicate</Dropdown.Item>
                             <Dropdown.Item onClick={this.handleEditing}>Edit</Dropdown.Item>
-                            <Dropdown.Item onClick={() => this.props.handleDelete(this.props.task.id)}>Delete</Dropdown.Item>
+                            <Dropdown.Item onClick={() => this.handleDelete(false)}>Delete</Dropdown.Item>
                         </DropdownButton>
                     </div>
                 </div>
+                <Modal show={this.state.deleting} onHide={() => this.setState({deleting: false})}>
+                    <Modal.Header>
+                        <Modal.Title>Confirm delete?</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        {this.getTaskDetailsLayout()}
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="danger" onClick={() => this.handleDelete(true)}>Delete</Button>
+                        <Button variant="dark" onClick={() => this.setState({deleting: false})}>Cancel</Button>
+                    </Modal.Footer>
+                </Modal>
             </ListGroup.Item>
        );
+    }
+    handleDelete(confirm: boolean){
+        if (confirm){
+            this.setState({deleting: false});
+            this.props.handleDelete(this.props.task.id);
+        } else {
+            this.setState({deleting: true});
+        }
     }
     handleEditing(){
         this.setState({ editing: true });
